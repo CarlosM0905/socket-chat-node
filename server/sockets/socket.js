@@ -35,6 +35,8 @@ io.on('connection', (client) => {
         // Emitir todas las personas presentes en el chat a todos los clientes que se encuentren en la misma sala
         // Cuando un cliente se ingresa al chat
         client.broadcast.to(data.sala).emit('listaPersona', usuarios.getPersonasPorSala(data.sala));
+        client.broadcast.to(data.sala).emit('crearMensaje', crearMensaje('Administrador',`${data.nombre} se unio :)`));
+
 
         // Y se retornan las personas al cliente
         callback(usuarios.getPersonasPorSala(data.sala))
@@ -42,11 +44,13 @@ io.on('connection', (client) => {
 
 
     // Cuando un usuario envia un mensaje
-    client.on('crearMensaje', (data)=>{
+    client.on('crearMensaje', (data, callback)=>{
         let persona = usuarios.getPersona(client.id);
 
         let mensaje = crearMensaje(persona.nombre, data.mensaje);
         client.broadcast.to(persona.sala).emit('crearMensaje', mensaje);
+
+        callback( mensaje);
     })
 
     client.on('disconnect', () => {

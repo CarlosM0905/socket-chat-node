@@ -1,12 +1,10 @@
 var socket = io();
-// Se revisan los parametros que llegan de la URL
+
 var params = new URLSearchParams(window.location.search);
 
-// Si no llega un parametro nombre
-if(!params.has('nombre') || !params.has('sala')){
-    // Regresar al index
+if (!params.has('nombre') || !params.has('sala')) {
     window.location = 'index.html';
-    throw new Error('El nombre y sala son necesario');
+    throw new Error('El nombre y sala son necesarios');
 }
 
 var usuario = {
@@ -14,22 +12,19 @@ var usuario = {
     sala: params.get('sala')
 };
 
-// Escuchar cuando me conecto
+
+
 socket.on('connect', function() {
-    // Informar que me conecte
     console.log('Conectado al servidor');
 
-    // Emitir el evento 'entrarChat'
-    socket.emit('entrarChat',
-    // Enviar el nombre del usuario
-    usuario , 
-    // Recibir la respuesta del usuario y mostrarla
-    function(resp){
-        console.log('Usuarios conectados', resp);
+    socket.emit('entrarChat', usuario, function(resp) {
+        // console.log('Usuarios conectados', resp);
+        renderizarUsuarios(resp);
     });
+
 });
 
-// Escuchar si me desconecto
+// escuchar
 socket.on('disconnect', function() {
 
     console.log('Perdimos conexión con el servidor');
@@ -45,17 +40,22 @@ socket.on('disconnect', function() {
 //     console.log('respuesta server: ', resp);
 // });
 
-// Escuchar mensaje de abandono de chat
+// Escuchar información
 socket.on('crearMensaje', function(mensaje) {
-    console.log('Servidor:', mensaje);
+    // console.log('Servidor:', mensaje);
+    renderizarMensajes(mensaje, false)
+    scrollBottom()
 });
 
-// Escuchar entradas o salidas de usuarios
+// Escuchar cambios de usuarios
+// cuando un usuario entra o sale del chat
 socket.on('listaPersona', function(personas) {
-    console.log(personas);
+    renderizarUsuarios(personas);
 });
 
-// Mensaje privado
-socket.on('mensajePrivado', function(mensaje){
-    console.log('Mensaje Privado: ', mensaje)
-})
+// Mensajes privados
+socket.on('mensajePrivado', function(mensaje) {
+
+    console.log('Mensaje Privado:', mensaje);
+
+});
